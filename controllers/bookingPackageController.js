@@ -30,6 +30,7 @@ exports.getBookingPackageById = async (req, res) => {
         console.log(error);
         res.status(500).json({ status: "error", message: error.message || "Something went wrong on the server." })
     }
+    
 }
 
 exports.createBookingPackage = async (req, res) => {

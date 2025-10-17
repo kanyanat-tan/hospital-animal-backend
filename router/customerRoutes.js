@@ -1,17 +1,17 @@
 const express = require('express');
-const { getAllCustomer, signUp, getCustomerById, deleteCusmoter,updateCustomer } = require('../controllers/customerController.js');
+const { getAllCustomer, createCustomer, getCustomerById, deleteCustomer,updateCustomer } = require('../controllers/customerController.js');
 const { checkID } = require('../middleware/checkID.js')
 
 
 const router = express.Router()
 
 router.route("/")
-                .post(checkID, signUp)
+                .post(checkID, createCustomer)
                 .get(getAllCustomer)
 
 router.route("/:id")
                 .get(checkID, getCustomerById)
-                .delete(checkID, deleteCusmoter)
+                .delete(checkID, deleteCustomer)
                 .patch(checkID,updateCustomer)
 
 

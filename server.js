@@ -49,6 +49,12 @@ app.use("/api/v1/packageMap", packageMapRouter)
 
 app.use("/api/v1/bookingPackage", bookingPackageRouter)
 
+app.all(/.*/, (req,res) => {
+    res.status(404).json({status : 'fail', data : `Path ${req.originalUrl} not found in the server`})
+})
+
+
+
 
 
 app.listen(port, () => {
