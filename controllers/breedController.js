@@ -1,21 +1,22 @@
 const pool = require('../config/pool');
+const errors = require('../utils/error')
 
-exports.getAllBreed = async (req, res) => {
+exports.getAllBreed = async (req, res, next) => {
     try {
         let sql = 'SELECT * FROM public.breed'
         let response = await pool.query(sql)
         if (response.rowCount > 0) {
             return res.status(200).json({ status: "success", data: response.rows })
         } else {
-            return res.status(404).json({ status: "error", message: "No breed data found" })
+            return res.status(200).json({ status: "success", message: "No breed data found", data: [] })
         }
     } catch (error) {
-        console.log(error);
-        res.status(500).json({ status: "error", message: error.message || "Something went wrong on the server." })
+        console.log(error.message);
+        errors.mapError(500, "Internal server error", next)
     }
 }
 
-exports.getBreedById = async (req, res) => {
+exports.getBreedById = async (req, res, next) => {
     try {
         let { id } = req.params
         let sql = 'SELECT * FROM public.breed WHERE breed_ID = $1'
@@ -23,15 +24,15 @@ exports.getBreedById = async (req, res) => {
         if (response.rowCount > 0) {
             return res.status(200).json({ status: "success", data: response.rows[0] })
         } else {
-            return res.status(404).json({ status: "error", message: "No breed data found" })
+            return res.status(404).json({ status: "error", message: "Breed not found" })
         }
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ status: "error", message: error.message || "Something went wrong on the server." })
+        console.log(error.message);
+        errors.mapError(500, "Internal server error", next)
     }
 }
 
-exports.createBreed = async (req, res) => {
+exports.createBreed = async (req, res, next) => {
     try {
         let { name, species, description, image_url } = req.body
         let sql = `INSERT INTO public.breed
@@ -41,16 +42,15 @@ exports.createBreed = async (req, res) => {
         if (response.rowCount > 0) {
             return res.status(200).json({ status: "success", data: "create successfully" })
         } else {
-            return res.status(404).json({ status: "error", message: "No breed data found" })
+            return res.status(400).json({ status: "error", message: "Invalid input" });
         }
     } catch (error) {
-        console.log(error);
-        res.status(500).json({ status: "error", message: error.message || "Something went wrong on the server." })
-
+        console.log(error.message);
+        errors.mapError(500, "Internal server error", next)
     }
 }
 
-exports.updateBreed = async (req, res) => {
+exports.updateBreed = async (req, res, next) => {
     try {
         let { id } = req.params
         let { name, species, description, image_url } = req.body
@@ -62,16 +62,15 @@ exports.updateBreed = async (req, res) => {
         if (response.rowCount > 0) {
             return res.status(200).json({ status: "success", data: "update successfully" })
         } else {
-            return res.status(404).json({ status: "error", message: "No breed data found" })
+            return res.status(404).json({ status: "error", message: "Breed not found" })
         }
     } catch (error) {
-        console.log(error);
-        res.status(500).json({ status: "error", message: error.message || "Something went wrong on the server." })
-
+        console.log(error.message);
+        errors.mapError(500, "Internal server error", next)
     }
 }
 
-exports.deleteBreed = async (req, res) => {
+exports.deleteBreed = async (req, res, next) => {
     try {
         let { id } = req.params
         let sql = `DELETE FROM public.breed WHERE breed_ID = $1 `
@@ -79,11 +78,11 @@ exports.deleteBreed = async (req, res) => {
         if (response.rowCount > 0) {
             return res.status(200).json({ status: "success", data: "delete successfully" })
         } else {
-            return res.status(404).json({ status: "error", message:  "No breed data found" })
+            return res.status(404).json({ status: "error", message: "Breed not found" })
         }
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ status: "error", message: error.message || "Something went wrong on the server." })
+        console.log(error.message);
+        errors.mapError(500, "Internal server error", next)
     }
 }
 

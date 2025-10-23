@@ -1,6 +1,7 @@
 const pool = require('../config/pool');
+const errors = require('../utils/error')
 
-exports.getAllPackageMap = async (req, res) => {
+exports.getAllPackageMap = async (req, res, next) => {
     try {
         let sql = `SELECT bpm.bookingPackageID,bpm.quantity,p.package_ID,p.title
             FROM booking_package_map bpm
@@ -9,15 +10,15 @@ exports.getAllPackageMap = async (req, res) => {
         if (response.rowCount > 0) {
             return res.status(200).json({ status: "success", data: response.rows })
         } else {
-            return res.status(404).json({ status: "error", message: "No bookingPackageMap data found" })
+            return res.status(200).json({ status: "success", message: "No packageMap data found", data: [] })
         }
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ status: "error", message: error.message || "Something went wrong on the server." })
+        console.log(error.message);
+        errors.mapError(500, "Internal server error", next)
     }
 }
 
-exports.getPackageMapById = async (req, res) => {
+exports.getPackageMapById = async (req, res, next) => {
     try {
         let { id } = req.params
         let sql = `SELECT bpm.bookingPackageID,bpm.quantity,p.package_ID,p.title
@@ -28,15 +29,15 @@ exports.getPackageMapById = async (req, res) => {
         if (response.rowCount > 0) {
             return res.status(200).json({ status: "success", data: response.rows[0] })
         } else {
-            return res.status(404).json({ status: "error", message: "No bookingPackageMap data found" })
+            return res.status(404).json({ status: "error", message: "BookingPackageMap not found" })
         }
     } catch (error) {
-        console.log(error);
-        res.status(500).json({ status: "error", message: error.message || "Something went wrong on the server." })
+        console.log(error.message);
+        errors.mapError(500, "Internal server error", next)
     }
 }
 
-exports.createPackageMap = async (req, res) => {
+exports.createPackageMap = async (req, res, next) => {
     try {
         let { bookingPackage, package, quantity } = req.body;
 
@@ -46,15 +47,15 @@ exports.createPackageMap = async (req, res) => {
         if (response.rowCount > 0) {
             return res.status(200).json({ status: "success", data: "create successfully" })
         } else {
-            return res.status(404).json({ status: "error", message: "No bookingPackageMap data found" })
+            return res.status(400).json({ status: "error", message: "Invalid input" });
         }
     } catch (error) {
-        console.log(error);
-        res.status(500).json({ status: "error", message: error.message || "Something went wrong on the server." })
+        console.log(error.message);
+        errors.mapError(500, "Internal server error", next)
     }
 }
 
-exports.deletePackageMap = async (req, res) => {
+exports.deletePackageMap = async (req, res, next) => {
     try {
         let { bookingPackageID, packageID } = req.params
         let sql = `DELETE FROM booking_package_map
@@ -63,11 +64,11 @@ exports.deletePackageMap = async (req, res) => {
         if (response.rowCount > 0) {
             return res.status(200).json({ status: "success", data: "delete successfully" })
         } else {
-            return res.status(404).json({ status: "error", message: "No bookingPackageMap data found" })
+            return res.status(404).json({ status: "error", message: "BookingPackageMap not found" })
         }
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ status: "error", message: error.message || "Something went wrong on the server." })
+        console.log(error.message);
+        errors.mapError(500, "Internal server error", next)
     }
 }
 

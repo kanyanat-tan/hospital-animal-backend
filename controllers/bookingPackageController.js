@@ -1,22 +1,23 @@
 const pool = require('../config/pool');
+const errors = require('../utils/error')
 
 
-exports.getAllBookingPackage = async (req, res) => {
+exports.getAllBookingPackage = async (req, res, next) => {
     try {
         let sql = 'SELECT * FROM public.booking_package'
         let response = await pool.query(sql)
         if (response.rowCount > 0) {
             return res.status(200).json({ status: "success", data: response.rows })
         } else {
-            return res.status(404).json({ status: "error", message: "No bookingPackage data found" })
+            return res.status(200).json({ status: "success", message: "No bookingPackage data found", data: [] })
         }
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ status: "error", message: error.message || "Something went wrong on the server." })
+        console.log(error.message);
+        errors.mapError(500, "Internal server error", next)
     }
 }
 
-exports.getBookingPackageById = async (req, res) => {
+exports.getBookingPackageById = async (req, res, next) => {
     try {
         let { id } = req.params
         let sql = 'SELECT * FROM public.booking_package WHERE bookingPackage_ID = $1'
@@ -24,16 +25,16 @@ exports.getBookingPackageById = async (req, res) => {
         if (response.rowCount > 0) {
             return res.status(200).json({ status: "success", data: response.rows[0] })
         } else {
-            return res.status(404).json({ status: "error", message: "No bookingPackage data found" })
+            return res.status(404).json({ status: "error", message: "BookingPackage not found" })
         }
     } catch (error) {
-        console.log(error);
-        res.status(500).json({ status: "error", message: error.message || "Something went wrong on the server." })
+        console.log(error.message);
+        errors.mapError(500, "Internal server error", next)
     }
-    
+
 }
 
-exports.createBookingPackage = async (req, res) => {
+exports.createBookingPackage = async (req, res, next) => {
     try {
         let { title, appointment, price, status, booking } = req.body
 
@@ -44,15 +45,15 @@ exports.createBookingPackage = async (req, res) => {
         if (response.rowCount > 0) {
             return res.status(200).json({ status: "success", data: "create successfully" })
         } else {
-            return res.status(404).json({ status: "error", message: "No bookingPackage data found" })
+            return res.status(400).json({ status: "error", message: "Invalid input" });
         }
     } catch (error) {
-        console.log(error);
-        res.status(500).json({ status: "error", message: error.message || "Something went wrong on the server." })
+        console.log(error.message);
+        errors.mapError(500, "Internal server error", next)
     }
 }
 
-exports.updateBookingPackage = async (req, res) => {
+exports.updateBookingPackage = async (req, res, next) => {
     try {
         let { id } = req.params
         let { title, appointment, price, status, booking } = req.body
@@ -63,15 +64,15 @@ exports.updateBookingPackage = async (req, res) => {
         if (response.rowCount > 0) {
             return res.status(200).json({ status: "success", data: "update successfully" })
         } else {
-            return res.status(404).json({ status: "error", message: "No bookingPackage data found" })
+            return res.status(404).json({ status: "error", message: "BookingPackage not found" })
         }
     } catch (error) {
-        console.log(error);
-        res.status(500).json({ status: "error", message: error.message || "Something went wrong on the server." })
+        console.log(error.message);
+        errors.mapError(500, "Internal server error", next)
     }
 }
 
-exports.deleteBookingPackage = async (req, res) => {
+exports.deleteBookingPackage = async (req, res, next) => {
     try {
         let { id } = req.params
         let sql = `DELETE FROM public.booking_package WHERE bookingPackage_ID = $1 `
@@ -79,10 +80,10 @@ exports.deleteBookingPackage = async (req, res) => {
         if (response.rowCount > 0) {
             return res.status(200).json({ status: "success", data: "delete successfully" })
         } else {
-            return res.status(404).json({ status: "error", message: "No bookingPackage data found" })
+            return res.status(404).json({ status: "error", message: "BookingPackage not found" })
         }
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ status: "error", message: error.message || "Something went wrong on the server." })
+        console.log(error.message);
+        errors.mapError(500, "Internal server error", next)
     }
 }
