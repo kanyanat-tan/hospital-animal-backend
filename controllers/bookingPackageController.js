@@ -58,8 +58,8 @@ exports.updateBookingPackage = async (req, res, next) => {
         let { id } = req.params
         let { title, appointment, price, status, booking } = req.body
         let sql = `UPDATE public.booking_package
-            SET title = $1, appointment = $2,price = $2,status = $2,bookingID = $5
-            WHERE bookingPackage_ID = $3`
+            SET title = $1, appointment = $2,price = $3,status = $4,bookingID = $5
+            WHERE bookingPackage_ID = $6`
         let response = await pool.query(sql, [title, appointment, price, status, booking, id])
         if (response.rowCount > 0) {
             return res.status(200).json({ status: "success", data: "update successfully" })

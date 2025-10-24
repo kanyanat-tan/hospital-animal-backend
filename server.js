@@ -14,12 +14,27 @@ const packageMapRouter = require('./router/packageMapRoutes')
 const bookingPackageRouter = require('./router/bookingPackageRoutes')
 const newCategoryRouter = require('./router/newCategoryRoutes')
 const roleRouter = require('./router/roleRoutes')
+const helmet = require('helmet')
+
+const rateLimit = require('express-rate-limit')
+
+const errors = require('./utils/error')
 
 const app = express();
 dotenv.config({ path: './config/config.env' })
 
-app.use(express.json());
+app.use(express.json({
+    limit : '100kb'
+}));
 app.use(morgan('dev'));
+app.use(helmet())
+
+const limiter = rateLimit({
+    limit : 10,
+    windowMs : 15 * 60 * 1000,
+    message : "Too many request"
+})
+app.use('/api', limiter)
 
 const port = process.env.PORT || 8080
 
@@ -49,11 +64,14 @@ app.use("/api/v1/packageMap", packageMapRouter)
 
 app.use("/api/v1/bookingPackage", bookingPackageRouter)
 
-app.all(/.*/, (req,res) => {
-    res.status(404).json({status : 'fail', data : `Path ${req.originalUrl} not found in the server`})
+app.all(/.*/, (req,res,next) => {
+   const err = new Error(`Path ${req.originalUrl} not found in the server`)
+   err.status = 'fail'
+   err.statusCode = 404
+   next(err)
 })
 
-
+app.use(errors.apiError)
 
 
 

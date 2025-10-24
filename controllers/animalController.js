@@ -18,7 +18,7 @@ exports.getAllAnimal = async (req, res, next) => {
 
 exports.createAnimal = async (req, res, next) => {
     try {
-        let { name, description, breed, customer, hospital } = req.body
+        let { name, description, breed, hospital } = req.body
 
         let hospitalQuery = await pool.query('SELECT hospital_ID FROM public.hospital WHERE name = $1', [hospital])
 
@@ -38,7 +38,7 @@ exports.createAnimal = async (req, res, next) => {
         let sql = `INSERT INTO public.animal
                 (name, description, breedID, customerID, hospitalID)
                 VALUES($1,$2,$3,$4,$5)`
-        let response = await pool.query(sql, [name, description, breed_ID, customer, hospital_ID])
+        let response = await pool.query(sql, [name, description, breed_ID, req.user.userid, hospital_ID])
         if (response.rowCount > 0) {
             return res.status(200).json({ status: "success", data: "Create successfully" })
         } else {
@@ -69,7 +69,7 @@ exports.getAnimalById = async (req, res, next) => {
 exports.updateAnimal = async (req, res, next) => {
     try {
         let { id } = req.params
-        let { name, description, breed, customer, hospital } = req.body
+        let { name, description, breed, hospital } = req.body
 
         let hospitalQuery = await pool.query('SELECT hospital_ID FROM public.hospital WHERE name = $1', [hospital])
 
@@ -88,7 +88,7 @@ exports.updateAnimal = async (req, res, next) => {
         let sql = `UPDATE public.animal
     SET name = $1, description = $2, breedID = $3, customerID = $4,hospitalID = $5 
     WHERE animal_ID = $6`
-        let response = await pool.query(sql, [name, description, breed_ID, customer, hospital_ID, id])
+        let response = await pool.query(sql, [name, description, breed_ID, req.user.userid, hospital_ID, id])
         if (response.rowCount > 0) {
             return res.status(200).json({ status: "success", data: "Update successfully" })
         } else {

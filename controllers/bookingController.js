@@ -35,9 +35,9 @@ exports.getBookingById = async (req, res, next) => {
 
 exports.createBooking = async (req, res, next) => {
     try {
-        let { booking_date, status, role, animal } = req.body
+        let { booking_date, status, animal } = req.body
 
-        let roleQuery = await pool.query('SELECT role_ID FROM public.role WHERE permission_level = $1', [role])
+        let roleQuery = await pool.query('SELECT role_ID FROM public.role WHERE permission_level = $1', [req.user.role])
 
         if (roleQuery.rows.length === 0) {
             return res.status(400).json({ status: "error", message: "Invalid role" });
@@ -46,9 +46,9 @@ exports.createBooking = async (req, res, next) => {
         let role_ID = roleQuery.rows[0].role_id;
 
         let sql = `INSERT INTO public.booking
-        (booking_date,status,roleID,animalID)
-        VALUES($1,$2,$3,$4)`
-        let response = await pool.query(sql, [booking_date, status, role_ID, animal])
+        (booking_date,status,roleID,animalID,customerID)
+        VALUES($1,$2,$3,$4,$5)`
+        let response = await pool.query(sql, [booking_date, status, role_ID, animal, req.user.userid])
         if (response.rowCount > 0) {
             return res.status(200).json({ status: "success", data: "create successfully" })
         } else {
@@ -64,9 +64,9 @@ exports.createBooking = async (req, res, next) => {
 exports.updateBooking = async (req, res, next) => {
     try {
         let { id } = req.params
-        let { booking_date, status, role, animal } = req.body
+        let { booking_date, status, animal } = req.body
 
-        let roleQuery = await pool.query('SELECT role_ID FROM public.role WHERE permission_level = $1', [role])
+        let roleQuery = await pool.query('SELECT role_ID FROM public.role WHERE permission_level = $1', [req.user.role])
 
         if (roleQuery.rows.length === 0) {
             return res.status(400).json({ status: "error", message: "Invalid role" });
@@ -75,9 +75,9 @@ exports.updateBooking = async (req, res, next) => {
         let role_ID = roleQuery.rows[0].role_id;
 
         let sql = `UPDATE public.booking
-                SET booking_date = $1, status = $2, roleID = $3, animalID = $4
-                WHERE booking_ID = $5`
-        let response = await pool.query(sql, [booking_date, status, role_ID, animal, id])
+                SET booking_date = $1, status = $2, roleID = $3, animalID = $4, customerID = $5
+                WHERE booking_ID = $6`
+        let response = await pool.query(sql, [booking_date, status, role_ID, animal, req.user.userid, id])
         if (response.rowCount > 0) {
             return res.status(200).json({ status: "success", data: "update successfully" })
         } else {

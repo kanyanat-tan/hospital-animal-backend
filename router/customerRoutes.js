@@ -1,19 +1,27 @@
 const express = require('express');
-const { getAllCustomer, createCustomer, getCustomerById, deleteCustomer,updateCustomer } = require('../controllers/customerController.js');
+const { getAllCustomer, getCustomerById, deleteCustomer, updateCustomer } = require('../controllers/customerController.js');
 const { checkID } = require('../middleware/checkID.js')
+const { verifyToken } = require('../config/verifyToken.js')
+const { verifyPermission } = require('../config/verifyPermission.js')
+const { signUp, signIn } = require('../controllers/userService.js')
 
 
 const router = express.Router()
 
 router.route("/")
-                .post(checkID, createCustomer)
-                .get(getAllCustomer)
+    .get(verifyToken,verifyPermission(['admin','user','doctor']), getAllCustomer)
+    .patch(verifyToken,verifyPermission(['admin','user','doctor']), updateCustomer)
 
 router.route("/:id")
-                .get(checkID, getCustomerById)
-                .delete(checkID, deleteCustomer)
-                .patch(checkID,updateCustomer)
+    .get(verifyToken, checkID,verifyPermission(['admin','user','doctor']), getCustomerById)
+    .delete(verifyToken, checkID,verifyPermission(['admin']), deleteCustomer)
 
+
+router.route("/signup")
+    .post(signUp)
+
+router.route("/login")
+    .post(signIn)
 
 
 

@@ -34,9 +34,9 @@ exports.getNewsById = async (req, res, next) => {
 
 exports.createNews = async (req, res, next) => {
     try {
-        let { title, content, image_url, create_date, category, role } = req.body
+        let { title, content, image_url, create_date, category } = req.body
 
-        let roleQuery = await pool.query('SELECT role_ID FROM public.role WHERE permission_level = $1', [role])
+        let roleQuery = await pool.query('SELECT role_ID FROM public.role WHERE permission_level = $1', [req.user.role])
 
         if (roleQuery.rows.length === 0) {
             return res.status(400).json({ status: "error", message: "Invalid role" });
@@ -69,9 +69,9 @@ exports.createNews = async (req, res, next) => {
 exports.updateNews = async (req, res, next) => {
     try {
         let { id } = req.params
-        let { title, content, image_url, create_date, category, role } = req.body
+        let { title, content, image_url, create_date, category } = req.body
 
-        let roleQuery = await pool.query('SELECT role_ID FROM public.role WHERE permission_level = $1', [role])
+        let roleQuery = await pool.query('SELECT role_ID FROM public.role WHERE permission_level = $1', [req.user.role])
 
         if (roleQuery.rows.length === 0) {
             return res.status(400).json({ status: "error", message: "Invalid role" });
