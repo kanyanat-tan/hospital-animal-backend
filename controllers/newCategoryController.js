@@ -55,7 +55,7 @@ exports.updateNewCategory = async (req, res, next) => {
         let { id } = req.params
         let { title } = req.body
         let sql = `UPDATE public.news_category
-                SET title = $1, 
+                SET title = $1
                 WHERE category_ID = $2`
         let response = await pool.query(sql, [title, id])
         if (response.rowCount > 0) {
@@ -78,6 +78,25 @@ exports.deleteNewCategory = async (req, res, next) => {
             return res.status(200).json({ status: "success", data: "delete successfully" })
         } else {
             return res.status(404).json({ status: "error", message: "NewCategory not found" })
+        }
+    } catch (error) {
+        console.log(error.message);
+        errors.mapError(500, "Internal server error", next)
+    }
+}
+
+exports.getAllNewCategoryName = async (req, res, next) => {
+    try {
+        const { name } = req.params
+        const sql =`SELECT nc.category_id, nc.title,n.news_id,n.title,n.content,n.create_date 
+            FROM public.news_category nc
+            JOIN news n ON nc.category_id = n.categoryid
+            WHERE nc.title = $1`
+        const response = await pool.query(sql, [name]);
+        if (response.rowCount > 0) {
+            return res.status(200).json({ status: "success", data: response.rows })
+        } else {
+            return res.status(404).json({ status: "error", message: "NewCategoey not found" })
         }
     } catch (error) {
         console.log(error.message);

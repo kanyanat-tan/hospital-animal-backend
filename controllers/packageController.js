@@ -35,11 +35,11 @@ exports.getPackageById = async (req, res, next) => {
 
 exports.createPackage = async (req, res, next) => {
     try {
-        let { title, packageDetail } = req.body
+        let { title } = req.body
         let sql = `INSERT INTO public.package
-            (title,packageID)
-            VALUES($1,$2)`
-        let response = await pool.query(sql, [title, packageDetail])
+            (title)
+            VALUES($1)`
+        let response = await pool.query(sql, [title])
         if (response.rowCount > 0) {
             return res.status(200).json({ status: "success", data: "create successfully" })
         } else {
@@ -70,12 +70,12 @@ exports.deletePackage = async (req, res, next) => {
 exports.updatePackage = async (req, res, next) => {
     try {
         let { id } = req.params
-        let { title, packageDetail } = req.body
+        let { title } = req.body
 
         let sql = `UPDATE public.package
-            SET title = $1, packageID = $2
-            WHERE package_ID = $3`
-        let response = await pool.query(sql, [title, packageDetail, id])
+            SET title = $1
+            WHERE package_ID = $2`
+        let response = await pool.query(sql, [title, id])
         if (response.rowCount > 0) {
             return res.status(200).json({ status: "success", data: "update successfully" })
         } else {

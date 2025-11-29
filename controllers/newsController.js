@@ -34,27 +34,12 @@ exports.getNewsById = async (req, res, next) => {
 
 exports.createNews = async (req, res, next) => {
     try {
-        let { title, content, image_url, create_date, category } = req.body
-
-        let roleQuery = await pool.query('SELECT role_ID FROM public.role WHERE permission_level = $1', [req.user.role])
-
-        if (roleQuery.rows.length === 0) {
-            return res.status(400).json({ status: "error", message: "Invalid role" });
-        }
-        let categoryQuery = await pool.query('SELECT category_ID FROM public.news_category WHERE title = $1', [category])
-        console.log(categoryQuery);
-
-        if (categoryQuery.rows.length === 0) {
-            return res.status(400).json({ status: "error", message: "Invalid category" });
-        }
-        let role_ID = roleQuery.rows[0].role_id;
-        let category_ID = categoryQuery.rows[0].category_id;
-
+        let { title, content, image_url, create_date, categoryid,roleid } = req.body
 
         let sql = `INSERT INTO public.news
         (title,content,image_url,create_date,categoryID,roleID)
     VALUES($1,$2,$3,$4,$5,$6)`
-        let response = await pool.query(sql, [title, content, image_url, create_date, category_ID, role_ID])
+        let response = await pool.query(sql, [title, content, image_url, create_date, categoryid, roleid])
         if (response.rowCount > 0) {
             return res.status(200).json({ status: "success", data: "create successfully" })
         } else {
@@ -69,25 +54,12 @@ exports.createNews = async (req, res, next) => {
 exports.updateNews = async (req, res, next) => {
     try {
         let { id } = req.params
-        let { title, content, image_url, create_date, category } = req.body
-
-        let roleQuery = await pool.query('SELECT role_ID FROM public.role WHERE permission_level = $1', [req.user.role])
-
-        if (roleQuery.rows.length === 0) {
-            return res.status(400).json({ status: "error", message: "Invalid role" });
-        }
-        let categoryQuery = await pool.query('SELECT category_ID FROM public.news_category WHERE title = $1', [category])
-
-        if (categoryQuery.rows.length === 0) {
-            return res.status(400).json({ status: "error", message: "Invalid category" });
-        }
-        let role_ID = roleQuery.rows[0].role_id;
-        let category_ID = categoryQuery.rows[0].category_id;
+        let { title, content, image_url, create_date, categoryid, roleid } = req.body
 
         let sql = `UPDATE public.news
     SET title = $1, content = $2, image_url = $3, create_date = $4,categoryID = $5 , roleID = $6 
     WHERE news_ID = $7`
-        let response = await pool.query(sql, [title, content, image_url, create_date, category_ID, role_ID, id])
+        let response = await pool.query(sql, [title, content, image_url, create_date, categoryid, roleid, id])
         if (response.rowCount > 0) {
             return res.status(200).json({ status: "success", data: "updated successfully" })
         } else {

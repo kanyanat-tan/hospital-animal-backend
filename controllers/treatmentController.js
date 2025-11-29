@@ -1,7 +1,7 @@
 const pool = require('../config/pool');
 const errors = require('../utils/error')
 
-exports.getAllTreatmentBooking = async (req, res, next) => {
+exports.getAllTreatment = async (req, res, next) => {
     try {
         let sql = 'SELECT * FROM public.treatment_booking'
         let response = await pool.query(sql)
@@ -32,14 +32,14 @@ exports.getTreatmentById = async (req, res, next) => {
     }
 }
 
-exports.createTreatmentBooking = async (req, res, next) => {
+exports.createTreatment = async (req, res, next) => {
     try {
-        let { title, appointment, weight, description, sterilization, booking } = req.body
+        let { title, appointment, weight, descriptiontreatment, sterilization, booking } = req.body
 
         let sql = `INSERT INTO public.treatment_booking
-                (title,appointment,weight,description,sterilization,bookingID)
+                (title,appointment,weight,descriptiontreatment,sterilization,bookingID)
                 VALUES($1,$2,$3,$4,$5,$6)`
-        let response = await pool.query(sql, [title, appointment, weight, description, sterilization, booking])
+        let response = await pool.query(sql, [title, appointment, weight, descriptiontreatment, sterilization, booking])
         if (response.rowCount > 0) {
             return res.status(200).json({ status: "success", data: "create successfully" })
         } else {
@@ -86,3 +86,7 @@ exports.updateTreatment = async (req, res, next) => {
         errors.mapError(500, "Internal server error", next)
     }
 }
+
+
+
+

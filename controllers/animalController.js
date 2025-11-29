@@ -52,11 +52,15 @@ exports.createAnimal = async (req, res, next) => {
 
 exports.getAnimalById = async (req, res, next) => {
     try {
-        let { id } = req.params
-        let sql = 'SELECT * FROM public.animal WHERE animal_ID = $1'
+        let id = req.user.userid
+        let sql = `SELECT a.name ,a.animal_id ,a.breedid, a.descriptionanimal ,a.hospitalid ,
+		        c.name ,c.address ,c.create_date, c.customer_id , c.email ,c.image_url ,c.roleid ,c.status ,c.telephone
+                FROM public.customer c
+                JOIN animal a on c.customer_id = a.customerid  
+                WHERE customer_id = $1`
         let response = await pool.query(sql, [id])
         if (response.rowCount > 0) {
-            return res.status(200).json({ status: "success", data: response.rows[0] })
+            return res.status(200).json({ status: "success", data: response.rows })
         } else {
             return res.status(404).json({ status: "error", message: "Animal not found" });
         }

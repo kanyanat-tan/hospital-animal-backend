@@ -32,6 +32,7 @@ exports.getPackageDetailById = async (req, res, next) => {
     }
 }
 
+
 exports.createPackageDetail = async (req, res, next) => {
     try {
         let { title, price, description } = req.body
@@ -67,22 +68,3 @@ exports.deletePackageDetail = async (req, res, next) => {
     }
 }
 
-exports.updatePackageDetail = async (req, res, next) => {
-    try {
-        let { id } = req.params
-        let { title, price, description } = req.body
-
-        let sql = `UPDATE public.package_detail
-            SET title = $1, price = $2, description = $3
-            WHERE packageDetail_ID = $4`
-        let response = await pool.query(sql, [title, price, description, id])
-        if (response.rowCount > 0) {
-            return res.status(200).json({ status: "success", data: "update successfully" })
-        } else {
-            return res.status(404).json({ status: "error", message: "PackageDetail not found" })
-        }
-    } catch (error) {
-        console.log(error.message);
-        errors.mapError(500, "Internal server error", next)
-    }
-}

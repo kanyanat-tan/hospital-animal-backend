@@ -19,8 +19,8 @@ exports.getAllCustomer = async (req, res, next) => {
 
 exports.getCustomerById = async (req, res, next) => {
     try {
-        let { id } = req.params
-        let sql = 'SELECT * FROM public.customer WHERE customer_ID = $1'
+        const id = req.user.userid
+        let sql = 'SELECT customer_id, name,email,address,telephone,status,create_date,image_url FROM public.customer WHERE customer_ID = $1'
         let response = await pool.query(sql, [id])
         if (response.rowCount > 0) {
             return res.status(200).json({ status: "success", data: response.rows[0] })
