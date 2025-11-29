@@ -6,12 +6,12 @@ const { verifyPermission } = require('../config/verifyPermission.js')
 
 const router = express.Router()
 router.route("/")
-    .get(verifyToken,verifyPermission(['user','admin','doctor']),getAllNews)
+    .get(getAllNews)
     .post(verifyToken,verifyPermission(['admin','doctor']),createNews)
 
 router.route("/:id")
     .patch(verifyToken,checkID,verifyPermission(['admin','doctor']),updateNews)
     .delete(verifyToken,checkID,verifyPermission(['admin','doctor']),deleteNews)
-    .get(verifyToken,checkID,verifyPermission(['admin','doctor']),getNewsById)
+    .get(getNewsById)
 
 module.exports = router;

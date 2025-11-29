@@ -8,11 +8,11 @@ const { verifyPermission } = require('../config/verifyPermission.js')
 const router = express.Router()
 
 router.route("/")
-    .get(verifyToken,verifyPermission(['admin']),getAllRole)
+    .get(verifyToken,getAllRole)
     .post(verifyToken,verifyPermission(['admin']),createRole)
 router.route("/:id")
-    .patch(verifyToken,checkID,verifyPermission(['admin']), updateRole)
-    .delete(verifyToken,checkID,verifyPermission(['admin']), deleteRole)
-    .get(verifyToken,checkID,verifyPermission(['admin']), getRoleById)
+    .patch(verifyToken,checkID,verifyPermission(['admin']),updateRole)
+    .delete(verifyToken,checkID,verifyPermission(['admin']),deleteRole)
+    .get(verifyToken,checkID,verifyPermission(['admin']),getRoleById)
 
 module.exports = router;

@@ -1,5 +1,5 @@
 const express = require('express');
-const { createNewCategory, getAllNewCategory, getNewsCategoryById, updateNewCategory, deleteNewCategory } = require('../controllers/newCategoryController')
+const { createNewCategory, getAllNewCategory, getNewsCategoryById, updateNewCategory, deleteNewCategory, getAllNewCategoryName } = require('../controllers/newCategoryController')
 const { checkID } = require('../middleware/checkID')
 const { verifyToken } = require('../config/verifyToken.js')
 const { verifyPermission } = require('../config/verifyPermission.js')
@@ -7,14 +7,17 @@ const { verifyPermission } = require('../config/verifyPermission.js')
 const router = express.Router()
 
 router.route("/")
-    .get(verifyToken, verifyPermission(['user', 'admin', 'doctor']), getAllNewCategory)
-    .post(verifyToken, verifyPermission(['admin']), createNewCategory)
+    .get(getAllNewCategory)
+    .post(verifyToken,verifyPermission(['admin','doctor']),createNewCategory)
 
 
 router.route("/:id")
-    .get(verifyToken, checkID, verifyPermission(['user', 'admin', 'doctor']), getNewsCategoryById)
-    .delete(verifyToken, checkID,verifyPermission(['admin']), deleteNewCategory)
-    .patch(verifyToken, checkID,verifyPermission(['admin']), updateNewCategory)
+    .get(getNewsCategoryById)
+    .delete(verifyToken,checkID,verifyPermission(['admin']),deleteNewCategory)
+    .patch(verifyToken,checkID,verifyPermission(['admin']),updateNewCategory)
+
+router.route("/by-name/:name")
+    .get(getAllNewCategoryName)
 
 
 module.exports = router;

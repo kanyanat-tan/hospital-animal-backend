@@ -3,18 +3,17 @@ const { getAllBooking, createBooking, updateBooking, deleteBooking, getBookingBy
 const { checkID } = require('../middleware/checkID')
 const { verifyToken } = require('../config/verifyToken.js')
 const { verifyPermission } = require('../config/verifyPermission.js')
-const {checkBookingOwnership} = require('../middleware/checkPermission.js')
 
 const router = express.Router()
 
 router.route("/")
-    .get(verifyToken,verifyPermission(['admin','doctor']),getAllBooking)
-    .post(verifyToken,verifyPermission(['user','admin','doctor']),createBooking)
+    .get(verifyToken,verifyPermission(['admin', 'doctor', 'user']),getAllBooking)
+    .post(verifyToken,verifyPermission(['admin', 'doctor', 'user']),createBooking)
 
 
 router.route("/:id")
-    .patch(verifyToken,checkID,verifyPermission(['user','admin','doctor']),checkBookingOwnership, updateBooking)
-    .delete(verifyToken,checkID,verifyPermission(['admin']), deleteBooking)
-    .get(verifyToken,checkID,verifyPermission(['user','admin','doctor']),checkBookingOwnership, getBookingById)
+    .patch(verifyToken,checkID,verifyPermission(['admin', 'doctor', 'user']),updateBooking)
+    .delete(verifyToken,checkID,verifyPermission(['admin', 'doctor', 'user']),deleteBooking)
+    .get(verifyToken,checkID,verifyPermission(['admin', 'doctor', 'user']),getBookingById)
 
 module.exports = router;

@@ -9,12 +9,12 @@ const { signUp, signIn } = require('../controllers/userService.js')
 const router = express.Router()
 
 router.route("/")
-    .get(verifyToken,verifyPermission(['admin','user','doctor']), getAllCustomer)
-    .patch(verifyToken,verifyPermission(['admin','user','doctor']), updateCustomer)
+    .get(verifyToken,verifyPermission(['admin',]),getCustomerById)
+    .patch(verifyToken,verifyPermission(['admin','user','doctor']),updateCustomer)
 
 router.route("/:id")
     .get(verifyToken, checkID,verifyPermission(['admin','user','doctor']), getCustomerById)
-    .delete(verifyToken, checkID,verifyPermission(['admin']), deleteCustomer)
+    .delete(verifyToken, checkID,verifyPermission(['admin']),deleteCustomer)
 
 
 router.route("/signup")
