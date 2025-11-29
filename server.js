@@ -13,8 +13,15 @@ const packageRouter = require('./router/packageRoutes')
 const packageMapRouter = require('./router/packageMapRoutes')
 const bookingPackageRouter = require('./router/bookingPackageRoutes')
 const newCategoryRouter = require('./router/newCategoryRoutes')
+const packageDetailInfo = require('./router/packageDetailInfoRoutes')
+const treatmentInfo = require('./router/treatmentInfoRoutes')
 const roleRouter = require('./router/roleRoutes')
+
+
 const helmet = require('helmet')
+const cors = require('cors')
+const cookieParser = require('cookie-parser');
+
 
 const rateLimit = require('express-rate-limit')
 
@@ -23,6 +30,8 @@ const errors = require('./utils/error')
 const app = express();
 dotenv.config({ path: './config/config.env' })
 
+app.use(cors({ origin : `${process.env.PORTHOSPITAL}`, credentials: true}))
+
 app.use(express.json({
     limit : '100kb'
 }));
@@ -30,11 +39,12 @@ app.use(morgan('dev'));
 app.use(helmet())
 
 const limiter = rateLimit({
-    limit : 10,
+    limit : 50,
     windowMs : 15 * 60 * 1000,
     message : "Too many request"
 })
 app.use('/api', limiter)
+app.use(cookieParser());
 
 const port = process.env.PORT || 8080
 
@@ -56,9 +66,13 @@ app.use("/api/v1/animal", animalRouter)
 
 app.use("/api/v1/treatment", treatmentRouter)
 
+app.use("/api/v1/treatmentInfo", treatmentInfo)
+
 app.use("/api/v1/packageDetail", packageDetailRouter)
 
 app.use("/api/v1/package", packageRouter)
+
+app.use("/api/v1/packageDetailInfo", packageDetailInfo)
 
 app.use("/api/v1/packageMap", packageMapRouter)
 
