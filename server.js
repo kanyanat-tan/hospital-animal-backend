@@ -30,18 +30,19 @@ const errors = require('./utils/error')
 const app = express();
 dotenv.config({ path: './config/config.env' })
 
-app.use(cors({ origin : `${process.env.PORTHOSPITAL}`, credentials: true}))
+app.use(cors({ origin: `${process.env.PORTHOSPITAL}`, credentials: true }))
+
 
 app.use(express.json({
-    limit : '100kb'
+    limit: '100kb'
 }));
 app.use(morgan('dev'));
 app.use(helmet())
 
 const limiter = rateLimit({
-    limit : 50,
-    windowMs : 15 * 60 * 1000,
-    message : "Too many request"
+    limit: 50,
+    windowMs: 15 * 60 * 1000,
+    message: "Too many request"
 })
 app.use('/api', limiter)
 app.use(cookieParser());
@@ -78,11 +79,12 @@ app.use("/api/v1/packageMap", packageMapRouter)
 
 app.use("/api/v1/bookingPackage", bookingPackageRouter)
 
-app.all(/.*/, (req,res,next) => {
-   const err = new Error(`Path ${req.originalUrl} not found in the server`)
-   err.status = 'fail'
-   err.statusCode = 404
-   next(err)
+
+app.all(/.*/, (req, res, next) => {
+    const err = new Error(`Path ${req.originalUrl} not found in the server`)
+    err.status = 'fail'
+    err.statusCode = 404
+    next(err)
 })
 
 app.use(errors.apiError)

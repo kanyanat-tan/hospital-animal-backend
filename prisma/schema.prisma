@@ -1,0 +1,192 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Customer {
+  customerId Int @id @default(autoincrement()) @map("customer_id")
+  name String
+  email String
+  password String
+  telephone String?
+  address String?
+  status String @default("active")
+  date DateTime @default(now()) @map("create_date")
+  imageUrl String? @map("image_url")
+
+  roleId Int? @map("roleid")
+  role   Role? @relation(fields: [roleId], references: [roleId])
+
+  booking Booking[]
+  animal  Animal[]
+}
+
+model Hospital  {
+  hospitalId Int @id @default(autoincrement()) @map("hospital_id")
+  name String
+  email String @unique
+  address String
+  imageUrl String? @map("image_url")
+  telephone String
+
+  roles Role[]  
+  animal Animal[]
+}
+
+model Role  {
+  roleId Int @id @default(autoincrement()) @map("role_id")
+  permission String  @map("permission_level")
+
+  hospitalId Int? @map("hospitalid")
+  hospital Hospital? @relation(fields: [hospitalId], references: [hospitalId])
+
+  customers Customer[]
+  news News[]
+  booking Booking[]
+}
+
+model News  {
+  newsId Int @id @default(autoincrement()) @map("news_id")
+  title String?
+  content String?
+  imageUrl String? @map("image_url")
+  date DateTime @default(now()) @map("create_date")
+
+  categoryId Int? @map("categoryid")
+  category NewsCategory? @relation(fields: [categoryId], references: [categoryId])
+
+  roleId Int? @map("roleid")
+  role  Role? @relation(fields: [roleId], references: [roleId])
+}
+
+model NewsCategory  {
+  categoryId Int @id @default(autoincrement()) @map("category_id")
+  title String
+
+  @@map("news_category")
+  news News[]
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+model Booking  {
+  bookingId Int @id @default(autoincrement()) @map("booking_id")
+  bookingDate DateTime @default(now()) @map("booking_date")
+  status BookingStatus @default(PENDING)
+
+  roleId Int? @map("roleid")
+  role  Role? @relation(fields: [roleId], references: [roleId])
+
+  animalId Int? @map("animalid")
+  animal Animal? @relation(fields: [animalId], references: [animalId])
+
+  customerId Int @map("customerid")
+  customer Customer @relation(fields: [customerId], references: [customerId])
+
+  treatmentBooking TreatmentBooking[]
+  bookingPackage BookingPackage[]
+}
+
+model Animal  {
+  animalId Int @id @default(autoincrement()) @map("animal_id") 
+  name String?
+  descriptionanimal String?
+
+  breedId Int? @map("breedid")
+  breed Breed? @relation(fields: [breedId], references: [breedId])
+
+  customerId Int? @map("customerid")
+  customer Customer? @relation(fields: [customerId], references: [customerId])
+
+  hospitalId Int? @map("hospitalid")
+  hospital Hospital? @relation(fields: [hospitalId], references: [hospitalId])
+
+  booking Booking[]
+}
+
+model Breed  {
+  breedId Int @id @default(autoincrement()) @map("breed_id") 
+  name String
+  species String
+  description String?
+  imageUrl String? @map("image_url")
+
+  animal Animal[]
+}
+
+enum SterilizationStatus {
+  YES
+  NO
+}
+
+model TreatmentBooking  {
+  treatmentBookingId Int @id @default(autoincrement()) @map("treatmentbooking_id") 
+  title String
+  appoinment DateTime
+  weight Decimal @db.Decimal(5, 2)
+  descriptiontreatment String?
+  sterilization SterilizationStatus
+
+  bookingId Int? @map("bookingid")
+  booking Booking? @relation(fields: [bookingId], references: [bookingId])
+
+  @@map("treatment_booking")
+}
+
+model BookingPackage  {
+  bookingPackageId Int @id @default(autoincrement()) @map("bookingpackage_id") 
+  title String?
+  price Decimal @db.Decimal(10, 2)
+
+  bookingId Int? @map("bookingid")
+  booking  Booking? @relation(fields: [bookingId], references: [bookingId])
+
+  @@map("booking_package")
+}
+
+model BookingPackageMap {
+  bookingPackageId Int @map("bookingpackageid")
+  packageId        Int @map("packageid")
+  packageDetailId  Int @map("packagedetailid")
+  quantity         Int?
+
+  packageDetail PackageDetail @relation(fields: [packageDetailId], references: [packageDetailId])
+
+  @@id([bookingPackageId, packageId, packageDetailId])
+  @@map("booking_package_map")
+}
+
+model Package  {
+  packageId Int @id @default(autoincrement()) @map("package_id")
+  title String
+
+  packageDetail PackageDetail[]
+}
+
+model PackageDetail  {
+  packageDetailId Int @id @default(autoincrement()) @map("packagedetail_id")
+  title String
+  price Decimal @default(0)
+  description String?
+  imageUrl String? @map("image_url")
+
+  packageId Int? @map("packageid")
+  package Package? @relation(fields: [packageId], references: [packageId])
+
+  @@map("package_detail")
+  bookingPackageMap BookingPackageMap[]
+}
