@@ -1,6 +1,6 @@
 const express = require('express');
 const {getAllPackage, getPackageById, createPackage, deletePackage, updatePackage } = require('../controllers/packageController')
-const { checkID } = require('../middleware/checkID')
+const { checkID, checkGetID } = require('../middleware/checkID')
 const { verifyToken } = require('../config/verifyToken.js')
 const { verifyPermission } = require('../config/verifyPermission.js')
 
@@ -13,7 +13,7 @@ router.route("/")
 router.route("/:id")
     .patch(verifyToken,checkID,verifyPermission(['admin']),updatePackage)
     .delete(verifyToken,checkID,verifyPermission(['admin']),deletePackage)
-    .get(getPackageById)
+    .get(checkGetID,getPackageById)
 
 
 

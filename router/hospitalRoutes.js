@@ -1,7 +1,7 @@
 const express = require('express');
 
 const {getAllHospital,updateHospital,createHospital,deleteHospital,getHospitalById} = require('../controllers/hospitalController.js')
-const {checkID} = require('../middleware/checkID.js')
+const {checkID, checkGetID} = require('../middleware/checkID.js')
 const { verifyToken } = require('../config/verifyToken.js')
 const { verifyPermission } = require('../config/verifyPermission.js')
 
@@ -13,6 +13,6 @@ router.route("/")
 router.route("/:id")
                 .patch(verifyToken,checkID,verifyPermission(['admin']),updateHospital)
                 .delete(verifyToken,checkID,verifyPermission(['admin']),deleteHospital)
-                .get(getHospitalById)
+                .get(checkGetID,getHospitalById)
 
 module.exports = router;

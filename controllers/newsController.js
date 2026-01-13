@@ -1,11 +1,16 @@
 const pool = require('../config/pool');
 const errors = require('../utils/error')
+const { createNewsSchema, updateNewsSchema, newsIdSchema } = require('../schemas/news.schema')
+
+const { hasResult } = require('../services/dbResult.helper')
+const newsService = require('../services/news.service')
+const repo = require('../repositories/news.repo')
 
 exports.getAllNews = async (req, res, next) => {
     try {
         let sql = 'SELECT * FROM public.news'
         let response = await pool.query(sql)
-        if (response.rowCount > 0) {
+       if (hasResult(response.rowCount)) {
             return res.status(200).json({ status: "success", data: response.rows })
         } else {
             return res.status(200).json({ status: "success", message: "No news data found", data: [] })
@@ -18,10 +23,17 @@ exports.getAllNews = async (req, res, next) => {
 
 exports.getNewsById = async (req, res, next) => {
     try {
-        let { id } = req.params
+        const result = newsIdSchema.safeParse(req.params)
+        if (!result.success) {
+            return res.status(400).json({
+                message: "Invalid resource id",
+                error: result.error.errors
+            })
+        }
+        let { id } = result.data
         let sql = 'SELECT * FROM public.news WHERE news_ID = $1'
         let response = await pool.query(sql, [id])
-        if (response.rowCount > 0) {
+       if (hasResult(response.rowCount)) {
             return res.status(200).json({ status: "success", data: response.rows[0] })
         } else {
             return res.status(404).json({ status: "error", message: "News not found" })
@@ -34,16 +46,19 @@ exports.getNewsById = async (req, res, next) => {
 
 exports.createNews = async (req, res, next) => {
     try {
-        let { title, content, image_url, create_date, categoryid,roleid } = req.body
-
-        let sql = `INSERT INTO public.news
-        (title,content,image_url,create_date,categoryID,roleID)
-    VALUES($1,$2,$3,$4,$5,$6)`
-        let response = await pool.query(sql, [title, content, image_url, create_date, categoryid, roleid])
-        if (response.rowCount > 0) {
+        const result = createNewsSchema.safeParse(req.body)
+        if (!result.success) {
+            return res.status(400).json({
+                message: "Invalid body",
+                error: result.error.errors
+            });
+        }
+        let { title, content, image_url, create_date, categoryid, roleid } = result.data
+        const success = await newsService.create(result.data, repo, pool)
+        if (success) {
             return res.status(200).json({ status: "success", data: "create successfully" })
         } else {
-            return res.status(400).json({ status: "error", message: "Invalid input" });
+            return res.status(400).json({ status: "error", message: "Failed to create news" });
         }
     } catch (error) {
         console.log(error.message);
@@ -53,14 +68,18 @@ exports.createNews = async (req, res, next) => {
 
 exports.updateNews = async (req, res, next) => {
     try {
-        let { id } = req.params
-        let { title, content, image_url, create_date, categoryid, roleid } = req.body
+        const result = updateNewsSchema.safeParse({ params: req.params, body: req.body });
+        if (!result.success) {
+            return res.status(400).json({
+                message: "Invalid body",
+                error: result.error.errors
+            });
+        }
+        let { id } = result.data.params
+        let { title, content, image_url, create_date, categoryid, roleid } = result.data.body
 
-        let sql = `UPDATE public.news
-    SET title = $1, content = $2, image_url = $3, create_date = $4,categoryID = $5 , roleID = $6 
-    WHERE news_ID = $7`
-        let response = await pool.query(sql, [title, content, image_url, create_date, categoryid, roleid, id])
-        if (response.rowCount > 0) {
+        const success = await newsService.update(result.data.body, id, repo, pool)
+        if (success) {
             return res.status(200).json({ status: "success", data: "updated successfully" })
         } else {
             return res.status(404).json({ status: "error", message: "News not found" })
@@ -73,10 +92,17 @@ exports.updateNews = async (req, res, next) => {
 
 exports.deleteNews = async (req, res, next) => {
     try {
-        let { id } = req.params
+        const result = newsIdSchema.safeParse(req.params)
+        if (!result.success) {
+            return res.status(400).json({
+                message: "Invalid resource id",
+                error: result.error.errors
+            })
+        }
+        let { id } = result.data
         let sql = `DELETE FROM public.news WHERE news_ID = $1 `
         let response = await pool.query(sql, [id])
-        if (response.rowCount > 0) {
+        if (hasResult(response.rowCount)) {
             return res.status(200).json({ status: "success", data: "delete successfully" })
         } else {
             return res.status(404).json({ status: "error", message: "News not found" })

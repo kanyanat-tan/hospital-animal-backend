@@ -3,7 +3,6 @@ const { getAllBookingPackage, createBookingPackage, getBookingPackageById, updat
 const { checkID } = require('../middleware/checkID')
 const { verifyToken } = require('../config/verifyToken.js')
 const { verifyPermission } = require('../config/verifyPermission.js')
-const { checkBookingPackageOwnership } = require('../middleware/checkPermission.js')
 
 const router = express.Router()
 
@@ -14,7 +13,7 @@ router.route("/")
 
 router.route("/:id")
     .delete(verifyToken, checkID, verifyPermission(['admin']), deleteBookingPackage)
-    .get(verifyToken, checkID, verifyPermission(['admin', 'doctor', 'user']), checkBookingPackageOwnership, getBookingPackageById)
-    .patch(verifyToken, checkID, verifyPermission(['admin', 'doctor', 'user']), checkBookingPackageOwnership, updateBookingPackage)
+    .get(verifyToken, checkID, verifyPermission(['admin', 'doctor', 'user']), getBookingPackageById)
+    .patch(verifyToken, checkID, verifyPermission(['admin', 'doctor', 'user']), updateBookingPackage)
 
 module.exports = router;

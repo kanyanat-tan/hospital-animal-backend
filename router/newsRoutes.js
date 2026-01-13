@@ -1,6 +1,6 @@
 const express = require('express');
 const { createNewCategory, createNews, updateNews, deleteNews, getAllNews, getNewsById } = require('../controllers/newsController');
-const { checkID } = require('../middleware/checkID');
+const { checkID, checkGetID } = require('../middleware/checkID');
 const { verifyToken } = require('../config/verifyToken.js')
 const { verifyPermission } = require('../config/verifyPermission.js')
 
@@ -12,6 +12,6 @@ router.route("/")
 router.route("/:id")
     .patch(verifyToken,checkID,verifyPermission(['admin','doctor']),updateNews)
     .delete(verifyToken,checkID,verifyPermission(['admin','doctor']),deleteNews)
-    .get(getNewsById)
+    .get(checkGetID,getNewsById)
 
 module.exports = router;

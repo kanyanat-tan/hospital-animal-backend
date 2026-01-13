@@ -1,11 +1,18 @@
 const pool = require('../config/pool');
 const errors = require('../utils/error')
+const { createBookingSchema, bookingIdSchema, updateBookingSchema } = require('../schemas/booking.schema')
+const roleRepo = require('../repositories/customer.repo')
+const { roleLogic } = require('../services/auth.service')
+
+const { hasResult } = require('../services/dbResult.helper')
+const repo = require('../repositories/booking.repo')
+const bookingService = require('../services/booking.service')
 
 exports.getAllBooking = async (req, res, next) => {
     try {
         let sql = 'SELECT * FROM public.booking'
         let response = await pool.query(sql)
-        if (response.rowCount > 0) {
+        if (hasResult(response.rowCount)) {
             return res.status(200).json({ status: "success", data: response.rows })
         } else {
             return res.status(200).json({ status: "success", message: "No booking data found", data: [] })
@@ -18,7 +25,11 @@ exports.getAllBooking = async (req, res, next) => {
 
 exports.getBookingById = async (req, res, next) => {
     try {
-        let { id } = req.params
+        const result = bookingIdSchema.safeParse(req.params);
+        if (!result.success) {
+            return res.status(400).json({ message: "Invalid resource id", error: result.error.errors })
+        }
+        let { id } = result.data
         let sql = 'SELECT * FROM public.booking WHERE booking_ID = $1'
         let response = await pool.query(sql, [id])
         if (response.rowCount > 0) {
@@ -32,27 +43,22 @@ exports.getBookingById = async (req, res, next) => {
     }
 }
 
-
 exports.createBooking = async (req, res, next) => {
     try {
-        let { booking_date, status, animal } = req.body
-
-        let roleQuery = await pool.query('SELECT role_ID FROM public.role WHERE permission_level = $1', [req.user.role])
-
-        if (roleQuery.rows.length === 0) {
-            return res.status(400).json({ status: "error", message: "Invalid role" });
+        const result = createBookingSchema.safeParse({ body: req.body });
+        if (!result.success) {
+            return res.status(400).json({
+                message: "Invalid body",
+                error: result.error.errors
+            });
         }
+        const roleid = await roleLogic(result.data, roleRepo, pool)
 
-        let role_ID = roleQuery.rows[0].role_id;
-
-        let sql = `INSERT INTO public.booking
-        (booking_date,status,roleID,animalID,customerID)
-        VALUES($1,$2,$3,$4,$5)`
-        let response = await pool.query(sql, [booking_date, status, role_ID, animal, req.user.userid])
-        if (response.rowCount > 0) {
+        const success = await bookingService.create(result.data, roleid, req.user.userid, repo, pool)
+        if (success) {
             return res.status(200).json({ status: "success", data: "create successfully" })
         } else {
-            return res.status(400).json({ status: "error", message: "Invalid input" });
+            return res.status(400).json({ status: "error", message: "Failed to create booking" });
         }
     } catch (error) {
         console.log(error.message);
@@ -63,22 +69,18 @@ exports.createBooking = async (req, res, next) => {
 
 exports.updateBooking = async (req, res, next) => {
     try {
-        let { id } = req.params
-        let { booking_date, status, animal } = req.body
-
-        let roleQuery = await pool.query('SELECT role_ID FROM public.role WHERE permission_level = $1', [req.user.role])
-
-        if (roleQuery.rows.length === 0) {
-            return res.status(400).json({ status: "error", message: "Invalid role" });
+        const result = updateBookingSchema.safeParse({ params: req.params, body: req.body });
+        if (!result.success) {
+            return res.status(400).json({
+                message: "Invalid body",
+                error: result.error.errors
+            });
         }
+        let { id } = result.data.params
+        const roleid = await roleLogic(req.user, roleRepo, pool)
 
-        let role_ID = roleQuery.rows[0].role_id;
-
-        let sql = `UPDATE public.booking
-                SET booking_date = $1, status = $2, roleID = $3, animalID = $4, customerID = $5
-                WHERE booking_ID = $6`
-        let response = await pool.query(sql, [booking_date, status, role_ID, animal, req.user.userid, id])
-        if (response.rowCount > 0) {
+        const success = await bookingService.update(result.data.body, roleid, req.user.userid, id, repo, pool)
+        if (success) {
             return res.status(200).json({ status: "success", data: "update successfully" })
         } else {
             return res.status(404).json({ status: "error", message: "Booking not found" })
@@ -91,11 +93,15 @@ exports.updateBooking = async (req, res, next) => {
 
 exports.deleteBooking = async (req, res, next) => {
     try {
-        let { id } = req.params
+        const result = bookingIdSchema.safeParse(req.params);
+        if (!result.success) {
+            return res.status(400).json({ message: "Invalid resource id", error: result.error.errors })
+        }
+        let { id } = result.data
         let sql = `DELETE FROM public.booking WHERE booking_ID = $1 `
         let response = await pool.query(sql, [id])
-        if (response.rowCount > 0) {
-            return res.status(200).json({ status: "success", data: "delete successfully" })
+        if (hasResult(response.rowCount)) {
+            return res.status(200).json({ status: "success", data: "Delete successfully" })
         } else {
             return res.status(404).json({ status: "error", message: "Booking not found" })
         }
